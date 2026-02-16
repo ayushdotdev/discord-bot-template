@@ -1,7 +1,7 @@
-import nextcord
-from nextcord.ext import commands
-from nextcord import ButtonStyle
-from main import config_cursor
+import discord
+from discord.ext import commands
+from discord import ButtonStyle
+import bot.config as config
 
 class general(commands.Cog):
   def __init__(self,bot):
@@ -9,19 +9,13 @@ class general(commands.Cog):
   
   @commands.command(name = 'help')
   async def help(self,ctx,*, cmd:str = None):
-    config_cursor.execute("""
-    SELECT server_prefix
-    FROM config
-    WHERE server_id = ?
-    """,(ctx.guild.id,))
-    row = config_cursor.fetchone()
-    prefix = row[0]
-    view = nextcord.ui.View()
-    prev_btn = nextcord.ui.Button(
+    prefix = config.PREFIX
+    view = discord.ui.View()
+    prev_btn =discord.ui.Button(
       label = "◀️",
       style = ButtonStyle.primary
       )
-    next_btn = nextcord.ui.Button(
+    next_btn = discord.ui.Button(
       label = "▶️",
       style = ButtonStyle.primary
       )
@@ -29,7 +23,7 @@ class general(commands.Cog):
     view.add_item(next_btn)
     pages = []
     for cog_name,cog_object in self.bot.cogs.items():
-      page = nextcord.Embed(
+      page = discord.Embed(
         title = f'*{cog_name} Commands*',
         color = 0xff00c8
         )
@@ -40,11 +34,11 @@ class general(commands.Cog):
           )
       pages.append(page)
     current_page = 0
-    async def prev_callback(interaction: nextcord.Interaction):
+    async def prev_callback(interaction: discord.Interaction):
       nonlocal current_page
       current_page = max(current_page - 1,0)
       await interaction.response.edit_message(embed = pages[current_page],view = view)
-    async def next_callback(interaction: nextcord.Interaction):
+    async def next_callback(interaction: discord.Interaction):
       nonlocal current_page
       current_page = max(current_page + 1,0)
       await interaction.response.edit_message(embed = pages[current_page],view = view)
